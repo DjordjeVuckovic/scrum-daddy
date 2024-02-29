@@ -1,0 +1,33 @@
+definitions:
+  errors.ApiError:
+    properties:
+      code:
+        type: integer
+      description:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /hello:
+    get:
+      consumes:
+      - application/json
+      description: Describe your endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ApiError'
+      summary: Summarize your endpoint
+      tags:
+      - v1
+swagger: "2.0"
