@@ -1,5 +1,9 @@
 definitions:
-  errors.ApiError:
+  api.CreateResponse:
+    properties:
+      id: {}
+    type: object
+  errors.ErrorResult:
     properties:
       code:
         type: integer
@@ -7,10 +11,92 @@ definitions:
         type: string
       message:
         type: string
+      timeStamp:
+        type: string
+    type: object
+  rooms.CreateRoomRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  rooms.PokerRoomDto:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      ownerId:
+        type: string
     type: object
 info:
   contact: {}
 paths:
+  /api/v1/rooms:
+    get:
+      consumes:
+      - application/json
+      description: Get all poker rooms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rooms.PokerRoomDto'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResult'
+      tags:
+      - rooms/v1
+    post:
+      consumes:
+      - application/json
+      description: Create new poker room
+      parameters:
+      - description: Create Room Request
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/rooms.CreateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.CreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResult'
+      tags:
+      - rooms/v1
+  /api/v1/rooms/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all poker rooms
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rooms.PokerRoomDto'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResult'
+      tags:
+      - rooms/v1
   /hello:
     get:
       consumes:
@@ -26,7 +112,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ApiError'
+            $ref: '#/definitions/errors.ErrorResult'
       summary: Summarize your endpoint
       tags:
       - v1

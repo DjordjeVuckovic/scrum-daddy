@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  scrum-daddy-db:
+    image: postgres:16.2
+    environment:
+      POSTGRES_USER: scrum-daddy
+      POSTGRES_PASSWORD: scrum-daddy
+      POSTGRES_DB: scrum-daddy
+    ports:
+      - "5444:5432"
+    volumes:
+      - scrum-daddy-db-data:/var/lib/postgresql/data
+    networks:
+      - scrum-daddy-net
+volumes:
+  scrum-daddy-db-data:
+    driver: local
+networks:
+  scrum-daddy-net:
+    driver: bridge

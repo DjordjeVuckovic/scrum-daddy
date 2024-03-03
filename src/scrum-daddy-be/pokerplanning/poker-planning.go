@@ -1,5 +1,0 @@
-package pokerplanning
-
-func Main() {
-
-}

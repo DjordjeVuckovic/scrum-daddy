@@ -3,9 +3,8 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"log"
-	"net/http"
 	"os"
-	_ "scrum-daddy-be/common/errors"
+	"scrum-daddy-be/common/api"
 	"scrum-daddy-be/common/swagger"
 )
 
@@ -14,14 +13,13 @@ func main() {
 		log.Println("No .env file found")
 		panic(err)
 	}
-
-	mux := http.NewServeMux()
-	BindEndpoints(mux)
-	swagger.SetupSwagger(mux)
-
 	port := os.Getenv("PORT")
+	server := api.NewServer(":" + port)
+	AddModules(server)
+
+	swagger.SetupSwagger(server.GetMux())
 	log.Printf("Starting server on port %s\n", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := server.Start(); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
 }
