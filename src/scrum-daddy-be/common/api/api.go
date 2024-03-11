@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"scrum-daddy-be/common/errors"
+	"strings"
 )
 
 type Server struct {
@@ -61,4 +63,25 @@ func handleError(apiFunc apiFunc) http.HandlerFunc {
 			}
 		}
 	}
+}
+
+func WithApiKeyAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	apiKey := os.Getenv("API_KEY_AUTH")
+	return func(w http.ResponseWriter, r *http.Request) {
+		apiKeyHeader := r.Header.Get("X-Api-Key")
+		if apiKeyHeader == "" {
+			noKeyErr := errors.NewErrorResult(http.StatusUnauthorized, "Api Key Not found", "")
+			_ = WriteJSON(w, http.StatusUnauthorized, noKeyErr)
+			return
+		}
+
+		if strings.Compare(apiKeyHeader, apiKey) != 0 {
+			badKeyErr := errors.NewErrorResult(http.StatusForbidden, "Api Key not valid", "")
+			_ = WriteJSON(w, http.StatusUnauthorized, badKeyErr)
+			return
+		}
+
+		handlerFunc(w, r)
+	}
+
 }

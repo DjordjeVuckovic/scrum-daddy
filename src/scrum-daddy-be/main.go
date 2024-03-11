@@ -2,24 +2,39 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"log"
+	"log/slog"
 	"os"
 	"scrum-daddy-be/common/api"
+	"scrum-daddy-be/common/db"
 	"scrum-daddy-be/common/swagger"
+	"scrum-daddy-be/identity"
+	"scrum-daddy-be/pokerplanning"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		slog.Error("No .env file found")
 		panic(err)
 	}
 	port := os.Getenv("PORT")
 	server := api.NewServer(":" + port)
-	AddModules(server)
+
+	dbConnection := db.Connect()
+	defer dbConnection.Close()
+
+	AddModules(server, dbConnection)
 
 	swagger.SetupSwagger(server.GetMux())
-	log.Printf("Starting server on port %s\n", port)
+	slog.Info("Starting server on port %s\n", port)
 	if err := server.Start(); err != nil {
-		log.Fatalf("Could not start server: %s\n", err)
+		slog.Error("Could not start server: %s\n", err)
 	}
+}
+
+func AddModules(s *api.Server, db *db.Database) {
+	moduleContainers := CreateModuleContainers(s, db)
+
+	pokerplanning.Main(moduleContainers.PokerPlanning)
+
+	identity.Main(moduleContainers.Identity)
 }

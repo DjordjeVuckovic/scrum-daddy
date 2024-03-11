@@ -10,8 +10,8 @@ type Database struct {
 	DB *gorm.DB
 }
 
-func (g *Database) GetDB() *gorm.DB {
-	return g.DB
+func (db *Database) GetDB() *gorm.DB {
+	return db.DB
 }
 
 func Connect() *Database {
@@ -23,7 +23,7 @@ func Connect() *Database {
 	return &Database{DB: dbConnection}
 }
 
-func Close(db *Database) {
+func (db *Database) Close() {
 	sqlDB, err := db.DB.DB()
 	if err != nil {
 		log.Fatal(err)
@@ -32,4 +32,21 @@ func Close(db *Database) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+type UnitOfWork interface {
+	BeginTransaction() *Database
+	Rollback() error
+}
+
+func (db *Database) BeginTransaction() *Database {
+	return &Database{DB: db.DB.Begin()}
+}
+
+func Rollback(db *Database) error {
+	err := db.DB.Rollback().Error
+	if err != nil {
+		log.Fatal(err)
+	}
+	return err
 }
