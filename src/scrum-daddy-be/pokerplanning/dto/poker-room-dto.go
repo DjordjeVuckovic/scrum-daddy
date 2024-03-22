@@ -2,7 +2,7 @@ package dto
 
 import (
 	"github.com/google/uuid"
-	"scrum-daddy-be/pokerplanning/types"
+	"scrum-daddy-be/pokerplanning/domain"
 )
 
 type PokerRoomDto struct {
@@ -11,7 +11,7 @@ type PokerRoomDto struct {
 	OwnerId uuid.UUID `json:"ownerId"`
 }
 
-func ToApi(pokerRoom *types.PokerRoom) PokerRoomDto {
+func ToApi(pokerRoom *domain.PokerRoom) PokerRoomDto {
 	return PokerRoomDto{
 		ID:      pokerRoom.ID,
 		Name:    pokerRoom.Name,
@@ -19,7 +19,7 @@ func ToApi(pokerRoom *types.PokerRoom) PokerRoomDto {
 	}
 }
 
-func ToApis(pokerRooms []*types.PokerRoom) []PokerRoomDto {
+func ToApis(pokerRooms []*domain.PokerRoom) []PokerRoomDto {
 	pokerRoomDtos := make([]PokerRoomDto, len(pokerRooms))
 	for i, pokerRoom := range pokerRooms {
 		pokerRoomDtos[i] = ToApi(pokerRoom)

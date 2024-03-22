@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"github.com/google/uuid"
 	contracts "scrum-daddy-be/identitycontracts"
 )
 
@@ -13,9 +14,9 @@ func NewIdentityContracts(c *Container) contracts.IIdentityContracts {
 }
 
 func (uc *Contract) CreateGuest(user contracts.CreateQuestUserRequest) (contracts.CreateQuestUserResponse, error) {
-	return CreateGuestUser(uc.IdentityContainer, &user)
+	return contracts.CreateQuestUserResponse{}, nil
 }
 
-func (uc *Contract) FindById(id string) (contracts.UserResponse, error) {
+func (uc *Contract) FindById(id uuid.UUID) (contracts.UserResponse, error) {
 	return contracts.UserResponse{}, nil
 }

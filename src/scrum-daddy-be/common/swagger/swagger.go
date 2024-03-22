@@ -1,7 +1,7 @@
 package swagger
 
 import (
-	_ "scrum-daddy-be/docs"
+	"scrum-daddy-be/docs"
 )
 
 import (
@@ -11,5 +11,12 @@ import (
 
 // SetupSwagger sets up the Swagger UI
 func SetupSwagger(mux *http.ServeMux) {
-	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+	setSwaggerInfo()
+	mux.Handle("/swagger-ui/", httpSwagger.WrapHandler)
+}
+
+func setSwaggerInfo() {
+	docs.SwaggerInfo.Title = "Scrum Daddy"
+	docs.SwaggerInfo.Description = "Scrum Daddy API"
+	docs.SwaggerInfo.Version = "1.0"
 }

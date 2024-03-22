@@ -14,32 +14,23 @@ type Modules struct {
 
 func CreateModuleContainers(s *api.Server, db *db.Database) Modules {
 	// identity
-	usersRepo := identity.NewUserRepository(db)
-	rolesRepo := identity.NewRoleRepository(db)
-	identityContainer := NewIdentityContainer(db, s, usersRepo, rolesRepo)
+	identityContainer := identity.NewIdentityContainer(
+		db,
+		s,
+	)
 
 	// identity contracts
 	identityContracts := identity.NewIdentityContracts(identityContainer)
 
 	// pokerPlanning
-	roomRepo := pokerplanning.NewPokerRoomRepository(db)
-	pokerPlanningContainer := pokerplanning.NewPokerPlanningContainer(db, s, roomRepo, identityContracts)
+	pokerPlanningContainer := pokerplanning.NewPokerPlanningContainer(
+		db,
+		s,
+		identityContracts,
+	)
 
 	return Modules{
 		PokerPlanning: pokerPlanningContainer,
 		Identity:      identityContainer,
-	}
-}
-
-func NewIdentityContainer(
-	db *db.Database,
-	s *api.Server,
-	userRepo identity.IUserRepository,
-	roleRepo identity.IRoleRepository) *identity.Container {
-	return &identity.Container{
-		Db:              db,
-		Server:          s,
-		IUserRepository: userRepo,
-		IRoleRepository: roleRepo,
 	}
 }

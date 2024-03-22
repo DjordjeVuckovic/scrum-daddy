@@ -3,23 +3,7 @@ definitions:
     properties:
       id: {}
     type: object
-  errors.ErrorResult:
-    properties:
-      code:
-        type: integer
-      description:
-        type: string
-      message:
-        type: string
-      timeStamp:
-        type: string
-    type: object
-  rooms.CreateRoomRequest:
-    properties:
-      name:
-        type: string
-    type: object
-  rooms.PokerRoomDto:
+  dto.PokerRoomDto:
     properties:
       id:
         type: string
@@ -28,6 +12,42 @@ definitions:
       ownerId:
         type: string
     type: object
+  pokerplanning.CreateRoomRequest:
+    properties:
+      autoReveal:
+        type: boolean
+      isAllReveal:
+        type: boolean
+      name:
+        type: string
+      ownerId:
+        type: string
+      showAverage:
+        type: boolean
+      votingSystem:
+        type: string
+    type: object
+  results.ErrType:
+    enum:
+    - Validation error
+    - Entity Not Found
+    type: string
+    x-enum-varnames:
+    - ValidationErrType
+    - NotFoundErrType
+  results.ErrorResult:
+    properties:
+      code:
+        type: integer
+      detail:
+        type: string
+      timeStamp:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/results.ErrType'
+    type: object
 info:
   contact: {}
 paths:
@@ -35,31 +55,27 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all poker rooms
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/rooms.PokerRoomDto'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errors.ErrorResult'
+            $ref: '#/definitions/dto.PokerRoomDto'
+      security:
+      - ApiKeyAuth: []
       tags:
-      - rooms/v1
+      - rooms
     post:
       consumes:
       - application/json
-      description: Create new poker room
       parameters:
       - description: Create Room Request
         in: body
         name: requestBody
         required: true
         schema:
-          $ref: '#/definitions/rooms.CreateRoomRequest'
+          $ref: '#/definitions/pokerplanning.CreateRoomRequest'
       produces:
       - application/json
       responses:
@@ -70,14 +86,13 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResult'
+            $ref: '#/definitions/results.ErrorResult'
       tags:
-      - rooms/v1
+      - rooms
   /api/v1/rooms/{id}:
     get:
       consumes:
       - application/json
-      description: Get all poker rooms
       parameters:
       - description: Room ID
         in: path
@@ -90,30 +105,39 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/rooms.PokerRoomDto'
+            $ref: '#/definitions/dto.PokerRoomDto'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResult'
+            $ref: '#/definitions/results.ErrorResult'
       tags:
-      - rooms/v1
-  /hello:
+      - rooms
+  /api/v1/rooms/secondary/{id}:
     get:
       consumes:
       - application/json
-      description: Describe your endpoint
+      parameters:
+      - description: Room Secondary ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/dto.PokerRoomDto'
+        "404":
+          description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResult'
-      summary: Summarize your endpoint
+            $ref: '#/definitions/results.ErrorResult'
       tags:
-      - v1
+      - rooms
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: X-Api-Key
+    type: apiKey
 swagger: "2.0"

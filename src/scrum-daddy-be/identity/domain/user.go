@@ -1,9 +1,9 @@
-package identity
+package domain
 
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"scrum-daddy-be/identity/common"
+	"scrum-daddy-be/identity/utils"
 )
 
 type User struct {
@@ -16,5 +16,5 @@ type User struct {
 }
 
 func (User) TableName() string {
-	return common.GetIdentitySchemaName() + ".users"
+	return utils.GetIdentitySchemaName() + ".users"
 }

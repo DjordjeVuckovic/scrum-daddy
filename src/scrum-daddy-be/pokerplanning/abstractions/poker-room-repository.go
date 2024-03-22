@@ -1,17 +1,19 @@
 package abstractions
 
 import (
+	"context"
 	"github.com/google/uuid"
-	"scrum-daddy-be/pokerplanning/types"
+	"scrum-daddy-be/pokerplanning/domain"
 )
 
 type Reader interface {
-	FindByID(id uuid.UUID) (*types.PokerRoom, error)
-	FindAll() ([]*types.PokerRoom, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*domain.PokerRoom, error)
+	FindBySecondaryID(ctx context.Context, id int) (*domain.PokerRoom, error)
+	FindAll(ctx context.Context) ([]*domain.PokerRoom, error)
 }
 
 type Writer interface {
-	Save(room *types.PokerRoom) (uuid.UUID, error)
+	Save(ctx context.Context, room *domain.PokerRoom) (uuid.UUID, error)
 }
 
 type IPokerRoomRepository interface {

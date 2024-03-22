@@ -17,7 +17,11 @@ const docTemplate = `{
     "paths": {
         "/api/v1/rooms": {
             "get": {
-                "description": "Get all poker rooms",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -25,25 +29,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "rooms/v1"
+                    "rooms"
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rooms.PokerRoomDto"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorResult"
+                            "$ref": "#/definitions/dto.PokerRoomDto"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create new poker room",
                 "consumes": [
                     "application/json"
                 ],
@@ -51,7 +48,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "rooms/v1"
+                    "rooms"
                 ],
                 "parameters": [
                     {
@@ -60,7 +57,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rooms.CreateRoomRequest"
+                            "$ref": "#/definitions/pokerplanning.CreateRoomRequest"
                         }
                     }
                 ],
@@ -74,15 +71,14 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/errors.ErrorResult"
+                            "$ref": "#/definitions/results.ErrorResult"
                         }
                     }
                 }
             }
         },
-        "/api/v1/rooms/{id}": {
+        "/api/v1/rooms/secondary/{id}": {
             "get": {
-                "description": "Get all poker rooms",
                 "consumes": [
                     "application/json"
                 ],
@@ -90,7 +86,43 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "rooms/v1"
+                    "rooms"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Room Secondary ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PokerRoomDto"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/results.ErrorResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rooms/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rooms"
                 ],
                 "parameters": [
                     {
@@ -105,42 +137,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rooms.PokerRoomDto"
+                            "$ref": "#/definitions/dto.PokerRoomDto"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/errors.ErrorResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/hello": {
-            "get": {
-                "description": "Describe your endpoint",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v1"
-                ],
-                "summary": "Summarize your endpoint",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorResult"
+                            "$ref": "#/definitions/results.ErrorResult"
                         }
                     }
                 }
@@ -154,32 +157,7 @@ const docTemplate = `{
                 "id": {}
             }
         },
-        "errors.ErrorResult": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "timeStamp": {
-                    "type": "string"
-                }
-            }
-        },
-        "rooms.CreateRoomRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "rooms.PokerRoomDto": {
+        "dto.PokerRoomDto": {
             "type": "object",
             "properties": {
                 "id": {
@@ -192,6 +170,67 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "pokerplanning.CreateRoomRequest": {
+            "type": "object",
+            "properties": {
+                "autoReveal": {
+                    "type": "boolean"
+                },
+                "isAllReveal": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                },
+                "showAverage": {
+                    "type": "boolean"
+                },
+                "votingSystem": {
+                    "type": "string"
+                }
+            }
+        },
+        "results.ErrType": {
+            "type": "string",
+            "enum": [
+                "Validation error",
+                "Entity Not Found"
+            ],
+            "x-enum-varnames": [
+                "ValidationErrType",
+                "NotFoundErrType"
+            ]
+        },
+        "results.ErrorResult": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "timeStamp": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/results.ErrType"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-Api-Key",
+            "in": "header"
         }
     }
 }`

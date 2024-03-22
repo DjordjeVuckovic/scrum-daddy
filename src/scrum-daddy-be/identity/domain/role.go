@@ -1,8 +1,8 @@
-package identity
+package domain
 
 import (
 	"github.com/google/uuid"
-	"scrum-daddy-be/identity/common"
+	"scrum-daddy-be/identity/utils"
 )
 
 type RoleName string
@@ -19,5 +19,5 @@ type Role struct {
 }
 
 func (Role) TableName() string {
-	return common.GetIdentitySchemaName() + ".roles"
+	return utils.GetIdentitySchemaName() + ".roles"
 }
