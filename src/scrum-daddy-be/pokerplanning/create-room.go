@@ -1,6 +1,7 @@
 package pokerplanning
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
@@ -22,8 +23,8 @@ type CreateRoomRequest struct {
 	ShowAverage  bool      `json:"showAverage"`
 }
 
-// HandlePostPokerRooms @Summary Create new poker room
-// @Detail Create new poker room
+// HandlePostPokerRooms @Summary Create new poker roomId
+// @Detail Create new poker roomId
 // @Tags rooms
 // @Accept  json
 // @Produce  json
@@ -39,13 +40,13 @@ func (c Container) HandlePostPokerRooms(w http.ResponseWriter, r *http.Request) 
 			"Invalid request",
 			err.Error())
 	}
-	log.Println("Create room request", *createRoomReq)
+	log.Println("Create roomId request", *createRoomReq)
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(r.Body)
 
 	repo := NewPokerRoomRepository(c.Db)
-	roomId, err := CreateRoom(repo, createRoomReq)
+	roomId, err := CreateRoom(r.Context(), repo, createRoomReq)
 
 	if err != nil {
 		var errResult *results.ErrorResult
@@ -58,13 +59,14 @@ func (c Container) HandlePostPokerRooms(w http.ResponseWriter, r *http.Request) 
 }
 
 func CreateRoom(
+	ctx context.Context,
 	repo abstractions.IPokerRoomRepository,
 	request *CreateRoomRequest) (uuid.UUID, error) {
 	room, err := domain.NewPokerRoom(request.Name, request.OwnerId)
 	if err != nil {
 		return uuid.Nil, err
 	}
-	id, err := repo.Save(room)
+	id, err := repo.Save(ctx, room)
 
 	if err != nil {
 		return uuid.Nil, err
