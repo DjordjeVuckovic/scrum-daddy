@@ -41,11 +41,6 @@ func (s *Server) GetMux() *http.ServeMux {
 func (s *Server) AddRoute(path string, handler http.HandlerFunc) {
 	s.mux.HandleFunc(path, handler)
 }
-func WithCORS() ServerOption {
-	return func(s *Server) {
-		s.mux.Handle("/", enableCORS(s.mux))
-	}
-}
 
 func enableCORS(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +68,7 @@ func WriteJSON(w http.ResponseWriter, code int, body any) error {
 	return json.NewEncoder(w).Encode(body)
 }
 
-func writeErrorJSON(w http.ResponseWriter, code int, body any) error {
+func writeErrorJSON(w http.ResponseWriter, code int, body interface{}) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(code)
 	return json.NewEncoder(w).Encode(body)

@@ -1,7 +1,9 @@
 package infrastructure
 
 import (
+	"context"
 	"github.com/google/uuid"
+	"log/slog"
 	"scrum-daddy-be/common/db"
 	"scrum-daddy-be/identity/abstractions"
 	"scrum-daddy-be/identity/domain"
@@ -14,7 +16,7 @@ type UserRepository struct {
 func UserRepositoryFactory(database *db.Database, uowFn db.UowFactoryFn) abstractions.IUserRepository {
 	uow, err := uowFn(database)
 	if err != nil {
-		panic(err)
+		slog.Error("Err")
 	}
 	return &UserRepository{uow: uow}
 }
@@ -22,18 +24,21 @@ func UserRepositoryFactory(database *db.Database, uowFn db.UowFactoryFn) abstrac
 func NewUserRepository(dba *db.Database) abstractions.IUserRepository {
 	return UserRepositoryFactory(dba, db.UowFactory)
 }
+func NewUserRepositoryWithUow(uow db.IUnitOfWork) abstractions.IUserRepository {
+	return &UserRepository{uow: uow}
+}
 
-func (r *UserRepository) CreateUser(user *domain.User) (uuid.UUID, error) {
-	result := r.uow.GetConnection().Db.Create(user)
+func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) (uuid.UUID, error) {
+	result := r.uow.GetConnection().WithContext(ctx).Create(user)
 	if result.Error != nil {
 		return uuid.Nil, result.Error
 	}
 	return user.ID, nil
 }
 
-func (r *UserRepository) FindById(id uuid.UUID) (*domain.User, error) {
+func (r *UserRepository) FindById(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	var usr domain.User
-	err := r.uow.GetConnection().Db.First(&usr, "id = ?", id).Error
+	err := r.uow.GetConnection().WithContext(ctx).First(&usr, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}

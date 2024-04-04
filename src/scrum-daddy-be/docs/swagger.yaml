@@ -27,6 +27,26 @@ definitions:
       votingSystem:
         type: string
     type: object
+  pokerplanning.CreateRoomWithUserRequest:
+    properties:
+      autoReveal:
+        type: boolean
+      isAllReveal:
+        type: boolean
+      name:
+        type: string
+      showAverage:
+        type: boolean
+      user:
+        $ref: '#/definitions/pokerplanning.UserCreateRoom'
+      votingSystem:
+        type: string
+    type: object
+  pokerplanning.UserCreateRoom:
+    properties:
+      username:
+        type: string
+    type: object
   results.ErrType:
     enum:
     - Validation error
@@ -131,6 +151,30 @@ paths:
             $ref: '#/definitions/dto.PokerRoomDto'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/results.ErrorResult'
+      tags:
+      - rooms
+  /api/v1/rooms/with-user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create Room Request
+        in: body
+        name: requestBody
+        required: true
+        schema:
+          $ref: '#/definitions/pokerplanning.CreateRoomWithUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.CreateResponse'
+        "400":
+          description: Bad Request
           schema:
             $ref: '#/definitions/results.ErrorResult'
       tags:

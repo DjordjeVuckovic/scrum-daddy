@@ -113,6 +113,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/rooms/with-user": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rooms"
+                ],
+                "parameters": [
+                    {
+                        "description": "Create Room Request",
+                        "name": "requestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pokerplanning.CreateRoomWithUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/results.ErrorResult"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/rooms/{id}": {
             "get": {
                 "consumes": [
@@ -190,6 +228,37 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "votingSystem": {
+                    "type": "string"
+                }
+            }
+        },
+        "pokerplanning.CreateRoomWithUserRequest": {
+            "type": "object",
+            "properties": {
+                "autoReveal": {
+                    "type": "boolean"
+                },
+                "isAllReveal": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "showAverage": {
+                    "type": "boolean"
+                },
+                "user": {
+                    "$ref": "#/definitions/pokerplanning.UserCreateRoom"
+                },
+                "votingSystem": {
+                    "type": "string"
+                }
+            }
+        },
+        "pokerplanning.UserCreateRoom": {
+            "type": "object",
+            "properties": {
+                "username": {
                     "type": "string"
                 }
             }

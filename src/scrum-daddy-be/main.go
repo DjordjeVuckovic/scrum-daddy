@@ -22,7 +22,7 @@ func main() {
 		panic(err)
 	}
 	port := os.Getenv("PORT")
-	server := api.NewServer(":"+port, api.WithCORS())
+	server := api.NewServer(":" + port)
 
 	dbConnection := db.Connect()
 	defer dbConnection.Close()

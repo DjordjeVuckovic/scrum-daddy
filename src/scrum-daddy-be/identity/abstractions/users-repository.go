@@ -1,16 +1,17 @@
 package abstractions
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"scrum-daddy-be/identity/domain"
 )
 
 type IUserRepositoryWriter interface {
-	CreateUser(user *domain.User) (uuid.UUID, error)
+	CreateUser(ctx context.Context, user *domain.User) (uuid.UUID, error)
 }
 
 type IUserRepositoryReader interface {
-	FindById(id uuid.UUID) (*domain.User, error)
+	FindById(ctx context.Context, id uuid.UUID) (*domain.User, error)
 }
 
 type IUserRepository interface {

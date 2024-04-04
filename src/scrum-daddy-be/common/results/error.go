@@ -30,13 +30,13 @@ func NewErrorResult(code int, title string, detail string) *ErrorResult {
 		Title:     title,
 		Detail:    detail,
 		TimeStamp: time.Now(),
-		Type:      GetDefaultErrType(code),
+		Type:      CreateErrType(code),
 	}
 }
 
 func NewTypedErrorResult(code int, title string, detail string, errType ErrType) *ErrorResult {
 	if errType == "" {
-		errType = GetDefaultErrType(code)
+		errType = CreateErrType(code)
 	}
 	return &ErrorResult{
 		Code:      code,
@@ -47,7 +47,7 @@ func NewTypedErrorResult(code int, title string, detail string, errType ErrType)
 	}
 }
 
-func GetDefaultErrType(code int) ErrType {
+func CreateErrType(code int) ErrType {
 	switch code {
 	case http.StatusBadRequest:
 		return "Bad Request"
