@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"scrum-daddy-be/common/logger"
 	"sync"
 )
 
@@ -29,6 +30,7 @@ func upgradeToWs() *websocket.Upgrader {
 type Client struct {
 	conn   *websocket.Conn
 	roomId string
+	user   RoomUser
 }
 
 type RoomUser struct {
@@ -42,55 +44,55 @@ type Message struct {
 	Vote string      `json:"vote,omitempty"` // Included for vote messages
 }
 
-type RoomManager struct {
+type RoomHub struct {
 	clients      map[*Client]bool
 	rooms        map[string]map[*Client]bool
 	broadcast    chan Message
 	register     chan *Client
-	unregister   chan *Client
+	removeClient chan *Client
 	clientsMutex sync.RWMutex
 }
 
-func NewRoomManager() *RoomManager {
-	return &RoomManager{
+func NewRoomManager() *RoomHub {
+	return &RoomHub{
 		clients:      make(map[*Client]bool),
 		rooms:        make(map[string]map[*Client]bool),
 		broadcast:    make(chan Message),
 		register:     make(chan *Client),
-		unregister:   make(chan *Client),
+		removeClient: make(chan *Client),
 		clientsMutex: sync.RWMutex{},
 	}
 }
 
-func (manager *RoomManager) listen() {
+func (hub *RoomHub) listen() {
 	slog.Info("Ws listening for messages...")
 	for {
 		select {
-		case client := <-manager.register:
-			manager.clients[client] = true
-			if _, ok := manager.rooms[client.roomId]; !ok {
-				manager.rooms[client.roomId] = make(map[*Client]bool)
+		case client := <-hub.register:
+			hub.clients[client] = true
+			if _, ok := hub.rooms[client.roomId]; !ok {
+				hub.rooms[client.roomId] = make(map[*Client]bool)
 			}
-			manager.rooms[client.roomId][client] = true
+			hub.rooms[client.roomId][client] = true
 			// Notify clients in the same roomId
 			log.Println("A new user has joined the roomId: ", client.roomId)
-			manager.broadcast <- Message{Type: "join", User: "A new user has joined the roomId: " + client.roomId}
-		case client := <-manager.unregister:
+			hub.broadcast <- Message{Type: Join, User: "A new user has joined the roomId: " + client.roomId}
+		case client := <-hub.removeClient:
 			slog.Debug("A user has left the roomId: ", "client", client.roomId)
-			if _, ok := manager.clients[client]; ok {
-				delete(manager.clients, client)
-				delete(manager.rooms[client.roomId], client)
+			if _, ok := hub.clients[client]; ok {
+				delete(hub.clients, client)
+				delete(hub.rooms[client.roomId], client)
 				err := client.conn.Close()
 				if err != nil {
 					slog.Error("Error closing connection: ", "error", err)
 				}
 			}
-		case message, ok := <-manager.broadcast:
+		case message, ok := <-hub.broadcast:
 			if !ok {
 				slog.Error("Broadcast channel closed")
 			}
 			slog.Debug("Broadcast message received: ", "message", message)
-			for client := range manager.clients {
+			for client := range hub.clients {
 				err := client.conn.WriteJSON(message)
 				log.Println("message: ", message, "client: ", client)
 				if err != nil {
@@ -104,7 +106,7 @@ func (manager *RoomManager) listen() {
 						if err != nil {
 							slog.Error("Error closing ws connection: ", "error", err)
 						}
-						delete(manager.clients, client)
+						delete(hub.clients, client)
 					}
 				}
 			}
@@ -112,18 +114,18 @@ func (manager *RoomManager) listen() {
 	}
 }
 
-func (manager *RoomManager) serveWs(w http.ResponseWriter, r *http.Request) {
+func (hub *RoomHub) serveWs(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgradeToWs().Upgrade(w, r, nil)
 	if err != nil {
-		slog.Error("Error upgrading connection: ", "error", err)
+		logger.Error("Error upgrading connection: ", err)
 		return
 	}
 	client := &Client{conn: conn, roomId: "exampleRoom"}
-	manager.register <- client
+	hub.register <- client
 
 	go func() {
 		defer func() {
-			manager.unregister <- client
+			hub.removeClient <- client
 		}()
 		for {
 			var msg Message
@@ -134,7 +136,7 @@ func (manager *RoomManager) serveWs(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			slog.Debug("Message received: ", "message", msg)
-			manager.broadcast <- msg
+			hub.broadcast <- msg
 			slog.Debug("Message brod: ", "message", msg)
 		}
 	}()

@@ -3,9 +3,9 @@ package identity
 import (
 	"context"
 	"log/slog"
+	contracts "scrum-daddy-be/contracts/identitycontracts"
 	"scrum-daddy-be/identity/abstractions"
 	"scrum-daddy-be/identity/domain"
-	contracts "scrum-daddy-be/identitycontracts"
 )
 
 func CreateGuestUser(

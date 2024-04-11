@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"scrum-daddy-be/common/api"
 	"scrum-daddy-be/common/db"
-	"scrum-daddy-be/identitycontracts"
+	"scrum-daddy-be/contracts/identitycontracts"
 	"scrum-daddy-be/pokerplanning/abstractions"
 	"scrum-daddy-be/pokerplanning/infrastructure"
 )

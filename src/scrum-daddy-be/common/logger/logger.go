@@ -13,3 +13,12 @@ func ConfigureLogger() {
 	))
 	slog.SetDefault(logger)
 }
+
+func Error(msg string, err interface{}, args ...interface{}) {
+	slog.Error(
+		msg,
+		args,
+		"err",
+		err,
+	)
+}
