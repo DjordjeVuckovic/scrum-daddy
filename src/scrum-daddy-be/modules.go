@@ -12,7 +12,7 @@ type Modules struct {
 	Identity      *identity.Container
 }
 
-func CreateModuleContainers(s *api.Server, db *db.Database) Modules {
+func CreateModules(s *api.Server, db *db.Database) Modules {
 	// identity
 	identityContainer := identity.NewIdentityContainer(
 		db,

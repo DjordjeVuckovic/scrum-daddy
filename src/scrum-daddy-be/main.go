@@ -40,7 +40,7 @@ func main() {
 }
 
 func AddModules(s *api.Server, db *db.Database) {
-	moduleContainers := CreateModuleContainers(s, db)
+	moduleContainers := CreateModules(s, db)
 
 	pokerplanning.Main(moduleContainers.PokerPlanning)
 

@@ -13,6 +13,7 @@ type Container struct {
 	Db                *db.Database
 	Server            *api.Server
 	IdentityContracts identitycontracts.IIdentityContracts
+	Hub               *Hub
 }
 
 func NewPokerPlanningContainer(
@@ -23,6 +24,7 @@ func NewPokerPlanningContainer(
 		Db:                db,
 		Server:            s,
 		IdentityContracts: identityContracts,
+		Hub:               NewRoomHub(),
 	}
 }
 
