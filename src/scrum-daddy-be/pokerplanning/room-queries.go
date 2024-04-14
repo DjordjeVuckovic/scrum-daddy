@@ -1,11 +1,14 @@
 package pokerplanning
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"net/http"
 	"scrum-daddy-be/common/api"
 	"scrum-daddy-be/common/results"
 	"scrum-daddy-be/common/utils"
+	"scrum-daddy-be/pokerplanning/abstractions"
+	"scrum-daddy-be/pokerplanning/domain"
 	"scrum-daddy-be/pokerplanning/dto"
 )
 
@@ -39,7 +42,7 @@ func (c Container) HandleGetPokerRoom(w http.ResponseWriter, r *http.Request) *r
 	return nil
 }
 
-// HandleGetSequentialPokerRoom @Tags rooms
+// HandleGetPokerRoomBySecondaryId @Tags rooms
 // @Param id path int true "Room Secondary ID"
 // @Tags rooms
 // @Accept  json
@@ -47,7 +50,7 @@ func (c Container) HandleGetPokerRoom(w http.ResponseWriter, r *http.Request) *r
 // @Success 200 {object} dto.PokerRoomDto
 // @Failure 404 {object} results.ErrorResult
 // @Router /api/v1/rooms/secondary/{id} [get]
-func (c Container) HandleGetSequentialPokerRoom(w http.ResponseWriter, r *http.Request) *results.ErrorResult {
+func (c Container) HandleGetPokerRoomBySecondaryId(w http.ResponseWriter, r *http.Request) *results.ErrorResult {
 	id := r.PathValue("id")
 	parsedId, err := utils.ParseToInt(id)
 	if err != nil {
@@ -55,17 +58,29 @@ func (c Container) HandleGetSequentialPokerRoom(w http.ResponseWriter, r *http.R
 	}
 
 	repo := NewPokerRoomRepository(c.Db)
+	room, errResult := GetPokerRoomBySecondaryId(
+		r.Context(),
+		repo,
+		parsedId,
+	)
+	if errResult != nil {
+		return errResult
+	}
+	_ = api.WriteJSON(w, http.StatusOK, dto.ToApi(room))
+	return nil
+}
 
-	room, err := repo.FindBySecondaryID(r.Context(), parsedId)
+func GetPokerRoomBySecondaryId(ctx context.Context, repo abstractions.IPokerRoomRepository, id int) (*domain.PokerRoom, *results.ErrorResult) {
+
+	room, err := repo.FindBySecondaryID(ctx, id)
 
 	if err != nil {
-		return results.NewErrorResult(
+		return nil, results.NewErrorResult(
 			http.StatusNotFound,
 			"Room not found",
 			err.Error())
 	}
-	_ = api.WriteJSON(w, http.StatusOK, dto.ToApi(room))
-	return nil
+	return room, nil
 }
 
 // HandleGetPokerRooms @Summary Get all poker rooms

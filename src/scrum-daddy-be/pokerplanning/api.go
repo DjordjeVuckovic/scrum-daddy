@@ -20,7 +20,7 @@ func AddPokerRooms(c *Container) {
 
 	c.Server.AddRoute(
 		"GET /api/v1/rooms/secondary/{id}",
-		api.MakeHandler(c.HandleGetSequentialPokerRoom))
+		api.MakeHandler(c.HandleGetPokerRoomBySecondaryId))
 
 	go c.Hub.listen()
 	c.Server.GetMux().HandleFunc("/ws/{roomId}", c.Hub.serveWs)

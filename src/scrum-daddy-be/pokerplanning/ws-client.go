@@ -64,7 +64,7 @@ func (c *Client) writeMessage() {
 		}
 	}()
 	for {
-		slog.Info("Writing message", "client", c.ID, "room", c.RoomID)
+		slog.Debug("Writing message", "client", c.ID, "room", c.RoomID)
 		message, ok := <-c.Message
 		if !ok {
 			slog.Error("Error reading message")

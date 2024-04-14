@@ -68,7 +68,7 @@ func WriteJSON(w http.ResponseWriter, code int, body any) error {
 	return json.NewEncoder(w).Encode(body)
 }
 
-func writeErrorJSON(w http.ResponseWriter, code int, body interface{}) error {
+func WriteErrorJSON(w http.ResponseWriter, code int, body interface{}) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(code)
 	return json.NewEncoder(w).Encode(body)
@@ -83,13 +83,13 @@ func handleError(apiFunc apiFunc) http.HandlerFunc {
 		if err := apiFunc(w, r); err != nil {
 			switch err.Code {
 			case http.StatusNotFound:
-				_ = writeErrorJSON(w, http.StatusNotFound, err)
+				_ = WriteErrorJSON(w, http.StatusNotFound, err)
 			case http.StatusBadRequest:
-				_ = writeErrorJSON(w, http.StatusBadRequest, err)
+				_ = WriteErrorJSON(w, http.StatusBadRequest, err)
 			case http.StatusConflict:
-				_ = writeErrorJSON(w, http.StatusConflict, err)
+				_ = WriteErrorJSON(w, http.StatusConflict, err)
 			default:
-				_ = writeErrorJSON(w, http.StatusInternalServerError, err)
+				_ = WriteErrorJSON(w, http.StatusInternalServerError, err)
 			}
 		}
 	}

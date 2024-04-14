@@ -1,6 +1,7 @@
 package pokerplanning
 
 import (
+	"context"
 	"log/slog"
 	"scrum-daddy-be/common/api"
 	"scrum-daddy-be/common/db"
@@ -24,7 +25,7 @@ func NewPokerPlanningContainer(
 		Db:                db,
 		Server:            s,
 		IdentityContracts: identityContracts,
-		Hub:               NewRoomHub(),
+		Hub:               NewRoomHub(context.Background(), db),
 	}
 }
 
