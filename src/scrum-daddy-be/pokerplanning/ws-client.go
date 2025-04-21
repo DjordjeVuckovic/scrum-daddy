@@ -13,7 +13,7 @@ type Client struct {
 	RoomID   int       `json:"roomId"`
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
-	Message  chan *HubMessage
+	Message  chan *HubEvent
 }
 
 const (
@@ -22,15 +22,18 @@ const (
 	Left MessageType = "left"
 )
 
-//type HubMessagePayload struct {
-//	Type MessageType `json:"type"`
-//}
-
-type HubMessage struct {
+// HubEvent is the message that will be sent to the hub
+type HubEvent struct {
 	Type   MessageType `json:"type"` // "join" or "vote"
 	User   string      `json:"user"`
 	RoomID int         `json:"roomId"`
 	Vote   int         `json:"vote,omitempty"`
+}
+
+type ClientMessage struct {
+	User   string `json:"user"`
+	RoomID int    `json:"roomId"`
+	Vote   int    `json:"vote,omitempty"`
 }
 
 func (c *Client) readMessage(hub *Hub) {
@@ -40,7 +43,7 @@ func (c *Client) readMessage(hub *Hub) {
 	}()
 
 	for {
-		msg := new(HubMessage)
+		msg := new(HubEvent)
 		err := c.conn.ReadJSON(msg)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(
@@ -49,9 +52,9 @@ func (c *Client) readMessage(hub *Hub) {
 				websocket.CloseAbnormalClosure) {
 				slog.Error("error while reading message", "err", err)
 			}
-			break
+			return
 		}
-		slog.Debug("HubMessage received: ", "message", msg)
+		slog.Debug("HubEvent received: ", "message", msg)
 		hub.broadcast <- msg
 	}
 }

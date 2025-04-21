@@ -39,7 +39,7 @@ type HubRoom struct {
 
 type Hub struct {
 	rooms      map[int]*HubRoom
-	broadcast  chan *HubMessage
+	broadcast  chan *HubEvent
 	register   chan *Client
 	unregister chan *Client
 	mtx        sync.RWMutex
@@ -50,7 +50,7 @@ type Hub struct {
 func NewRoomHub(ctx context.Context, db *db.Database) *Hub {
 	return &Hub{
 		rooms:      make(map[int]*HubRoom),
-		broadcast:  make(chan *HubMessage, 50),
+		broadcast:  make(chan *HubEvent, 50),
 		register:   make(chan *Client, 5),
 		unregister: make(chan *Client, 5),
 		mtx:        sync.RWMutex{},
@@ -87,7 +87,7 @@ func (hub *Hub) listen() {
 			if _, ok := hub.rooms[client.RoomID]; ok {
 				if _, ok := hub.rooms[client.RoomID].Clients[client.ID]; ok {
 					if len(hub.rooms[client.RoomID].Clients) != 0 {
-						hub.broadcast <- &HubMessage{
+						hub.broadcast <- &HubEvent{
 							Type:   Left,
 							User:   client.Username,
 							RoomID: client.RoomID,
@@ -131,7 +131,7 @@ func (hub *Hub) handleRegisterEvent(client *Client) {
 		slog.Debug("Adding client to room")
 		r.Clients[client.ID] = client
 
-		m := &HubMessage{
+		m := &HubEvent{
 			Type:   Join,
 			RoomID: client.RoomID,
 			User:   client.Username,
@@ -188,7 +188,7 @@ func (hub *Hub) serveWs(w http.ResponseWriter, r *http.Request) {
 		RoomID:   roomId,
 		Username: username,
 		ID:       userId,
-		Message:  make(chan *HubMessage, 10),
+		Message:  make(chan *HubEvent, 10),
 	}
 	hub.register <- client
 

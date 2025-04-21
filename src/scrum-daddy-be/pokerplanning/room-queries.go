@@ -25,7 +25,11 @@ func (c Container) HandleGetPokerRoom(w http.ResponseWriter, r *http.Request) *r
 	id := r.PathValue("id")
 	parsedId, err := uuid.Parse(id)
 	if err != nil || parsedId == uuid.Nil {
-		return results.NewErrorResult(http.StatusBadRequest, "Invalid id", err.Error())
+		return results.NewErrorResult(
+			http.StatusBadRequest,
+			"Invalid id",
+			"Cannot parse route parameter",
+		)
 	}
 
 	repo := NewPokerRoomRepository(c.Db)

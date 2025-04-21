@@ -21,6 +21,7 @@ func (uc *Contract) CreateGuest(ctx context.Context, user identitycontracts.Crea
 	ctxUow := ctx.Value("uow")
 	uow, ok := ctxUow.(db.IUnitOfWork)
 	if !ok {
+
 		return identitycontracts.CreateQuestUserResponse{}, fmt.Errorf("error while reading uow key")
 	}
 	usersRepo := infrastructure.NewUserRepositoryWithUow(uow)
